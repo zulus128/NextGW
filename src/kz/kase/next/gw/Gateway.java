@@ -5,6 +5,8 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SingleThreadedClaimStrategy;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
+import kz.kase.next.gw.handlers.in.Unmarshaller;
+import kz.kase.next.gw.handlers.out.Publisher;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -25,6 +27,8 @@ public class Gateway {
 
         int inThreads = 3;
 
+        Unmarshaller unmarshaller = new Unmarshaller();
+
         Disruptor<EventContainer> inDisruptor = new Disruptor<EventContainer>(EventContainer.EVENT_FACTORY,
                 Executors.newFixedThreadPool(inThreads),
                 new MultiThreadedClaimStrategy(IN_RING_SIZE),
@@ -35,9 +39,9 @@ public class Gateway {
         RingBuffer<EventContainer> inBuffer = inDisruptor.start();
 
 
-        TradeServer server = new TradeServer(port, inBuffer);
+        UserServer server = new UserServer(port, inBuffer);
 
-        statLogger = new StatLogger();
+//        statLogger = new StatLogger();
         Publisher publisher = new Publisher(server);
 
         int outThreads = 3;
@@ -46,23 +50,24 @@ public class Gateway {
                 new SingleThreadedClaimStrategy(OUT_RING_SIZE),
                 new SleepingWaitStrategy());
 
-        outDisruptor.handleEventsWith(statLogger)
-                .then(publisher);
+//        outDisruptor.handleEventsWith(statLogger)
+//                .then(publisher);
+        outDisruptor.handleEventsWith(publisher);
+
         RingBuffer<EventContainer> outBuffer = outDisruptor.start();
 
         mainHandler.setOutBuffer(outBuffer);
-
 
         server.start();
     }
 
 
-    public StatLogger getStatLogger() {
-        return statLogger;
-    }
+//    public StatLogger getStatLogger() {
+//        return statLogger;
+//    }
 
     public static void main(String[] args) throws IOException {
-        int port = 1570;
-        TradeSystem system = new TradeSystem(port);
+        int port = 1580;
+        Gateway gw = new Gateway(port);
     }
 }
