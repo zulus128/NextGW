@@ -24,17 +24,17 @@ public class Publisher implements EventHandler<EventContainer> {
     @Override
     public void onEvent(EventContainer ev, long sequence, boolean endOfBatch) throws Exception {
 
-        if (ev.getObj() instanceof Public) {
-            Public pub = (Public) ev.getObj();
-
-            Message mes = pub.publish();
-            if (pub.getServerAction() != null && mes != null) {
-                server.sendToAllUsers(Protocol.ServerAction.newBuilder()
-                        .setAction(pub.getServerAction())
-                        .setData(mes.toByteString())
-                        .build());
-            }
-        }
+//        if (ev.getObj() instanceof Public) {
+//            Public pub = (Public) ev.getObj();
+//
+//            Message mes = pub.publish();
+//            if (pub.getServerAction() != null && mes != null) {
+//                server.sendToAllUsers(Protocol.ServerAction.newBuilder()
+//                        .setAction(pub.getServerAction())
+//                        .setData(mes.toByteString())
+//                        .build());
+//            }
+//        }
 
     }
 }
