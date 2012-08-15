@@ -5,6 +5,7 @@ import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.SingleThreadedClaimStrategy;
 import com.lmax.disruptor.SleepingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
+import kz.kase.next.gw.handlers.in.ServerHandler;
 import kz.kase.next.gw.handlers.in.Unmarshaller;
 import kz.kase.next.gw.handlers.out.Publisher;
 
@@ -28,6 +29,7 @@ public class Gateway {
         int inThreads = 3;
 
         Unmarshaller unmarshaller = new Unmarshaller();
+        ServerHandler serverHandler = new ServerHandler();
 
         Disruptor<EventContainer> inDisruptor = new Disruptor<EventContainer>(EventContainer.EVENT_FACTORY,
                 Executors.newFixedThreadPool(inThreads),
@@ -35,14 +37,14 @@ public class Gateway {
                 new SleepingWaitStrategy());
 
 //        inDisruptor.handleEventsWith(journaler).then(mainHandler);
-        inDisruptor.handleEventsWith(unmarshaller).then(mainHandler);
+        inDisruptor.handleEventsWith(unmarshaller).then(serverHandler);
         RingBuffer<EventContainer> inBuffer = inDisruptor.start();
 
 
-        UserServer server = new UserServer(port, inBuffer);
+        UserServer userserver = new UserServer(port, inBuffer);
 
 //        statLogger = new StatLogger();
-        Publisher publisher = new Publisher(server);
+        Publisher publisher = new Publisher(userserver);
 
         int outThreads = 3;
         Disruptor<EventContainer> outDisruptor = new Disruptor<EventContainer>(EventContainer.EVENT_FACTORY,
@@ -56,9 +58,9 @@ public class Gateway {
 
         RingBuffer<EventContainer> outBuffer = outDisruptor.start();
 
-        mainHandler.setOutBuffer(outBuffer);
+//        mainHandler.setOutBuffer(outBuffer);
 
-        server.start();
+        userserver.start();
     }
 
 
