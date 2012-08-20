@@ -116,6 +116,7 @@ public class UserServer implements Runnable{
 
 
         private void publish(byte[] bytes) throws InvalidProtocolBufferException {
+
             long sequence = inBuffer.next();
             EventContainer event = inBuffer.get(sequence);
             event.setTimestamp(System.nanoTime());

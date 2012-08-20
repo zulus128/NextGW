@@ -49,7 +49,8 @@ public class Gateway {
         int outThreads = 3;
         Disruptor<EventContainer> outDisruptor = new Disruptor<EventContainer>(EventContainer.EVENT_FACTORY,
                 Executors.newFixedThreadPool(outThreads),
-                new SingleThreadedClaimStrategy(OUT_RING_SIZE),
+//                new SingleThreadedClaimStrategy(OUT_RING_SIZE),
+                new MultiThreadedClaimStrategy(OUT_RING_SIZE),
                 new SleepingWaitStrategy());
 
 //        outDisruptor.handleEventsWith(statLogger)
@@ -58,9 +59,10 @@ public class Gateway {
 
         RingBuffer<EventContainer> outBuffer = outDisruptor.start();
 
-//        mainHandler.setOutBuffer(outBuffer);
+        serverHandler.setOutBuffer(outBuffer);
 
         userserver.start();
+        serverHandler.start();
     }
 
 
