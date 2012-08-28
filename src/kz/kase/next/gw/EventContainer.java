@@ -25,6 +25,7 @@ public final class EventContainer {
     private long timestamp;
 
 
+
     public RawData getRawData() {
         return rawData;
     }

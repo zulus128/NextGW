@@ -5,8 +5,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.lmax.disruptor.RingBuffer;
 import kz.kase.ts.kase.proto.Protocol;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -86,27 +88,38 @@ public class UserServer implements Runnable{
             System.out.println("Starting user session");
 
             try {
-                InputStream in = socket.getInputStream();
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
                 while (true) {
                     try {
-                        final int firstByte = in.read();
-                        if (firstByte == -1) {
-                            //todo close session?
-                            return;
+                        String str;
+                        if ((str = br.readLine()) != null) {
+                            publish(str.getBytes());
                         }
-
-                        final int size = CodedInputStream.readRawVarint32(firstByte, in);
-                        byte[] bytes = new byte[size];
-                        int read = in.read(bytes);
-
-                        publish(bytes);
-
                     } catch (SocketTimeoutException e) {
                         e.printStackTrace();
                     }
-
                 }
+//                InputStream in = socket.getInputStream();
+//                while (true) {
+//                    try {
+//                        final int firstByte = in.read();
+//                        if (firstByte == -1) {
+//                            //todo close session?
+//                            return;
+//                        }
+//
+//                        final int size = CodedInputStream.readRawVarint32(firstByte, in);
+//                        byte[] bytes = new byte[size];
+//                        int read = in.read(bytes);
+//
+//                        publish(bytes);
+//
+//                    } catch (SocketTimeoutException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -123,6 +136,15 @@ public class UserServer implements Runnable{
             event.setRawData(bytes);
             inBuffer.publish(sequence);
         }
+
+//        private void publish(String str) {
+//
+//            long sequence = inBuffer.next();
+//            EventContainer event = inBuffer.get(sequence);
+//            event.setTimestamp(System.nanoTime());
+//            event.setRawData(bytes);
+//            inBuffer.publish(sequence);
+//        }
 
     }
 
